@@ -16,6 +16,7 @@ const sequelize = new Sequelize(
 const connectToDatabase = async () => {
     try {
         await sequelize.authenticate()
+        await sequelize.sync({ alter: true })
         console.log('Connection to PostgreSQL database established successfully.')
         console.log(`${process.env.DATABASE_NAME}`)
 
