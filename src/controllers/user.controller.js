@@ -1,11 +1,12 @@
 const User = require('../models/user.model')
 const { HTTPResponse } = require('../helpers/response.helper')
 const generateHashPassword = require("../helpers/bcrypt.helper")
+const statusCodes = require("http-status-codes")
 
 const getAllUsers = async ctx => {
   const users = await User.findAll()
   const response = new HTTPResponse('Operation completed successfully', users)
-  ctx.status = StatusCodes.OK
+  ctx.status = statusCodes.OK
   ctx.body = response
 }
 
@@ -17,9 +18,9 @@ const registerMe = async ctx => {
   if (user) {
     error = new HTTPError(
       'User exists, try logging in!',
-      StatusCodes.BAD_REQUEST
+      statusCodes.BAD_REQUEST
     )
-    ctx.status = StatusCodes.BAD_REQUEST
+    ctx.status = statusCodes.BAD_REQUEST
     ctx.body = error
     return
   }
@@ -36,7 +37,7 @@ const registerMe = async ctx => {
   console.log(newUser, 'User created successfully!!!!!!!!')
 
   response = new HTTPResponse('User created successfully!', newUser)
-  ctx.status = StatusCodes.OK
+  ctx.status = statusCodes.OK
   ctx.body = response
 }
 

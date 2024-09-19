@@ -4,7 +4,7 @@ const { catchAsyncErrors } = require("../helpers/tryCatch.helper")
 
 const userPublicRoutes = new Router({ prefix: "/auth"});
 
-userPublicRoutes.get("/sign-up", catchAsyncErrors(registerMe))
+userPublicRoutes.post("/sign-up", catchAsyncErrors(registerMe))
 
 
 module.exports = { userPublicRoutes }
