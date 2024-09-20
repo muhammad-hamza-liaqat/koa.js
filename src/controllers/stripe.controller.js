@@ -34,4 +34,16 @@ const userSubscriptionStatus = async ctx =>{
   ctx.body = response;
 }
 
-module.exports = { stripeSubscription, userSubscriptionStatus }
+const deleteSubscription = async ctx =>{
+  const { subscriptionId } = ctx.request.body;
+  const cancelSubscription = await stripe.subscriptions.cancel(subscriptionId, {
+    prorate: false // You can set this to true if you want prorated refunds
+  });
+  // console.log("subscription cancelled!", cancelSubscription)
+  let response = new HTTPResponse("subscription cancelled successfully!", cancelSubscription)
+  ctx.status = statusCodes.OK;
+  ctx.body = response
+}
+
+
+module.exports = { stripeSubscription, userSubscriptionStatus, deleteSubscription }
