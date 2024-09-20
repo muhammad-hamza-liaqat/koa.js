@@ -51,6 +51,8 @@ const deleteSubscription = async ctx => {
 }
 
 const stripeWebHook = async ctx => {
+  console.warn("inside webhook of stripe--------------------------->")
+
   const sig = ctx.headers['stripe-signature']
   let event
 
@@ -70,6 +72,7 @@ const stripeWebHook = async ctx => {
     ctx.body = errors
     return
   }
+  console.log("event incoming", event.type);
 
   switch (event.type) {
     case 'customer.subscription.created':
@@ -85,16 +88,6 @@ const stripeWebHook = async ctx => {
           `Subscription is past due for customer ${subscriptionUpdated.customer}`
         )
       }
-      break
-
-    case 'invoice.payment_succeeded':
-      const invoiceSucceeded = event.data.object
-      console.log('Payment succeeded for invoice:', invoiceSucceeded.id)
-      break
-
-    case 'invoice.payment_failed':
-      const invoiceFailed = event.data.object
-      console.log('Payment failed for invoice:', invoiceFailed.id)
       break
 
     case 'customer.subscription.deleted':

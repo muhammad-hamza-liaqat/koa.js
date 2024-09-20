@@ -9,3 +9,5 @@ const rawBodyMiddleware = bodyParser({
         ctx.throw('body parse error', 422);
     }
 });
+
+module.exports = rawBodyMiddleware
