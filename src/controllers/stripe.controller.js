@@ -2,7 +2,6 @@ const statusCodes = require('http-status-codes')
 const { HTTPResponse } = require('../helpers/response.helper')
 const stripe = require('stripe')(process.env.STRIPE_SECRET)
 
-
 const stripeSubscription = async ctx => {
   let response;
   const { priceId } = ctx.request.body;
@@ -25,4 +24,14 @@ const stripeSubscription = async ctx => {
     ctx.body = response;
 };
 
-module.exports = { stripeSubscription }
+const userSubscriptionStatus = async ctx =>{
+  const { subscriptionId } = ctx.request.body;
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  // console.log("subscription status", subscription.status);
+  let response = new HTTPResponse("subscription retrieved successfully!", {subscriptionStatus:subscription.status});
+  // console.log("response", response);
+  ctx.status = statusCodes.OK;
+  ctx.body = response;
+}
+
+module.exports = { stripeSubscription, userSubscriptionStatus }
