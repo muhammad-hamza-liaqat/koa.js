@@ -148,11 +148,40 @@ const updateSubscriptionCard = async ctx => {
   ctx.body = response
 }
 
+const upcomingBills = async ctx => {
+  // const { subscriptionId } = ctx.request.body;
+  const subscriptionId = ctx.request.params.id;
+  console.log(" subscriptionId", subscriptionId);
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const customerId = subscription.customer; 
+  const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+    subscription: subscriptionId,
+    customer: customerId,
+  });
+
+  const periodStartDate = new Date(upcomingInvoice.period_start * 1000).toISOString().split('T')[0];
+  const periodEndDate = new Date(upcomingInvoice.period_end * 1000).toISOString().split('T')[0];
+
+
+  let response = new HTTPResponse("date fetched successfully", {
+    periodStart: periodStartDate,
+    periodEnd: periodEndDate,
+  })
+
+  ctx.status = statusCodes.OK
+  ctx.body = response
+};
+
+
+
+
 
 module.exports = {
   stripeSubscription,
   userSubscriptionStatus,
   deleteSubscription,
   stripeWebHook,
-  updateSubscriptionCard
+  updateSubscriptionCard,
+  upcomingBills
 }
