@@ -6,8 +6,7 @@ const {
   updateSubscriptionCard,
   upcomingBills,
   getSubscriptionDetails,
-  createTestClockAndSubscription,
-  fastForwardTestClock
+  advanceBillingTesting
 } = require('../controllers/stripe.controller')
 const { catchAsyncErrors } = require('../helpers/tryCatch.helper')
 const Router = require('koa-router')
