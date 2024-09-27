@@ -50,132 +50,184 @@ const deleteSubscription = async ctx => {
   ctx.body = response
 }
 
-const stripeWebHook = async (ctx) => {
-  console.warn("Inside webhook of Stripe --------------------------->");
+const stripeWebHook = async ctx => {
+  console.warn('Inside webhook of Stripe --------------------------->')
 
-  const sig = ctx.headers['stripe-signature'];
-  let event;
+  const sig = ctx.headers['stripe-signature']
+  let event
 
   try {
     event = stripe.webhooks.constructEvent(
       ctx.request.rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
-    );
+    )
   } catch (error) {
-    console.error(`⚠️ Webhook signature verification failed: ${error.message}`);
+    console.error(`⚠️ Webhook signature verification failed: ${error.message}`)
     const errors = new HTTPError(
       'Webhook signature verification failed',
       statusCodes.BAD_REQUEST
-    );
-    ctx.status = statusCodes.BAD_REQUEST;
-    ctx.body = errors;
-    return;
+    )
+    ctx.status = statusCodes.BAD_REQUEST
+    ctx.body = errors
+    return
   }
 
-  console.log("Event incoming:", event.type);
+  console.log('Event incoming:', event.type)
 
   switch (event.type) {
     case 'customer.subscription.created':
-      const subscriptionCreated = event.data.object;
-      console.log('Subscription created:', subscriptionCreated.id);
-      break;
+      const subscriptionCreated = event.data.object
+      console.log('Subscription created:', subscriptionCreated.id)
+      break
 
     case 'customer.subscription.updated':
-      console.log("Inside customer.subscription.updated webhook event------------------------->");
-      const subscriptionUpdated = event.data.object;
-      console.log('Subscription updated:', subscriptionUpdated.id);
+      console.log(
+        'Inside customer.subscription.updated webhook event------------------------->'
+      )
+      const subscriptionUpdated = event.data.object
+      console.log('Subscription updated:', subscriptionUpdated.id)
 
       if (subscriptionUpdated.default_payment_method) {
-        console.log("Inside {customer.subscription.updated}> {subscriptionUpdated.default_payment_method}");
-        console.log('New default payment method:', subscriptionUpdated.default_payment_method);
+        console.log(
+          'Inside {customer.subscription.updated}> {subscriptionUpdated.default_payment_method}'
+        )
+        console.log(
+          'New default payment method:',
+          subscriptionUpdated.default_payment_method
+        )
       }
-      break;
+      break
 
     case 'customer.subscription.deleted':
-      const subscriptionDeleted = event.data.object;
-      console.log('Subscription canceled:', subscriptionDeleted.id);
-      break;
+      const subscriptionDeleted = event.data.object
+      console.log('Subscription canceled:', subscriptionDeleted.id)
+      break
 
     case 'customer.subscription.paused':
-      const subscriptionPaused = event.data.object;
-      console.log('Subscription paused:', subscriptionPaused.id);
-      break;
+      const subscriptionPaused = event.data.object
+      console.log('Subscription paused:', subscriptionPaused.id)
+      break
 
     case 'subscription_schedule.canceled':
-      const scheduledCancel = event.data.object;
-      console.log('Scheduled subscription canceled:', scheduledCancel.id);
-      break;
+      const scheduledCancel = event.data.object
+      console.log('Scheduled subscription canceled:', scheduledCancel.id)
+      break
 
     case 'invoice.payment_failed':
-      const invoiceFailed = event.data.object;
-      console.log('Payment failed for invoice:', invoiceFailed.id);
-      console.log(`Customer ${invoiceFailed.customer} payment failed. Subscription ID: ${invoiceFailed.subscription}`);
-      break;
+      const invoiceFailed = event.data.object
+      console.log('Payment failed for invoice:', invoiceFailed.id)
+      console.log(
+        `Customer ${invoiceFailed.customer} payment failed. Subscription ID: ${invoiceFailed.subscription}`
+      )
+      break
 
     case 'payment_method.attached':
-      const paymentMethodAttached = event.data.object;
-      console.log('Payment method attached:', paymentMethodAttached.id);
-      console.log(`Payment method ${paymentMethodAttached.id} was attached to customer ${paymentMethodAttached.customer}.`);
-      break;
+      const paymentMethodAttached = event.data.object
+      console.log('Payment method attached:', paymentMethodAttached.id)
+      console.log(
+        `Payment method ${paymentMethodAttached.id} was attached to customer ${paymentMethodAttached.customer}.`
+      )
+      break
+
+    case 'invoice.payment_succeeded':
+      const invoice = event.data.object
+      console.log('invoice', invoice.subscription)
+      console.log('Invoice paid for subscription(webhook called)')
+      break
+
+    case 'invoice.payment_failed':
+      const failedInvoice = event.data.object
+      console.log('payment failed for subscription', failedInvoice.subscription)
+      break
+
+    case 'invoice.created':
+      const invoiceCreated = event.data.object
+      console.log('payment failed for subscription', invoiceCreated)
+      break
 
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      console.log(`Unhandled event type: ${event.type}`)
   }
 
   const response = new HTTPResponse('Webhook successfully processed', {
     receivedEvent: true
-  });
-  ctx.status = statusCodes.OK;
-  ctx.body = response;
-};
-
+  })
+  ctx.status = statusCodes.OK
+  ctx.body = response
+}
 
 const updateSubscriptionCard = async ctx => {
-  const { subscriptionId, newCardDetails } = ctx.request.body;
-  console.log("{incoming request body}", ctx.request.body);
+  const { subscriptionId, newCardDetails } = ctx.request.body
+  console.log('{incoming request body}', ctx.request.body)
   const paymentMethod = await stripe.paymentMethods.create({
     type: 'card',
-    card: newCardDetails,
-  });
-  const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
-    default_payment_method: paymentMethod.id,
-  });
-  console.log("updatedSubscription", updatedSubscription);
+    card: newCardDetails
+  })
+  const updatedSubscription = await stripe.subscriptions.update(
+    subscriptionId,
+    {
+      default_payment_method: paymentMethod.id
+    }
+  )
+  console.log('updatedSubscription', updatedSubscription)
 
-  let response = new HTTPResponse("card updated successfully!", statusCodes.OK);
+  let response = new HTTPResponse('card updated successfully!', statusCodes.OK)
   ctx.response = statusCodes.OK
   ctx.body = response
 }
 
 const upcomingBills = async ctx => {
   // const { subscriptionId } = ctx.request.body;
-  const subscriptionId = ctx.request.params.id;
-  console.log(" subscriptionId", subscriptionId);
+  const subscriptionId = ctx.request.params.id
+  console.log(' subscriptionId', subscriptionId)
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  const customerId = subscription.customer; 
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const customerId = subscription.customer
   const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
     subscription: subscriptionId,
-    customer: customerId,
-  });
+    customer: customerId
+  })
 
-  const periodStartDate = new Date(upcomingInvoice.period_start * 1000).toISOString().split('T')[0];
-  const periodEndDate = new Date(upcomingInvoice.period_end * 1000).toISOString().split('T')[0];
+  const periodStartDate = new Date(upcomingInvoice.period_start * 1000)
+    .toISOString()
+    .split('T')[0]
+  const periodEndDate = new Date(upcomingInvoice.period_end * 1000)
+    .toISOString()
+    .split('T')[0]
 
-
-  let response = new HTTPResponse("date fetched successfully", {
+  let response = new HTTPResponse('date fetched successfully', {
     periodStart: periodStartDate,
-    periodEnd: periodEndDate,
+    periodEnd: periodEndDate
   })
 
   ctx.status = statusCodes.OK
   ctx.body = response
-};
+}
 
+const getSubscriptionDetails = async ctx => {
+  const { subscriptionId } = ctx.request.body
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  // console.log("subscription retrieved", subscription);
+  let response = new HTTPResponse('subscription fetched', subscription)
+  ctx.status = statusCodes.OK
+  ctx.body = response
+}
 
+const fastForwardTestClock = async ctx => {
+  const { testClockId } = ctx.request.body
 
+  const updatedTestClock = await stripe.test_helpers.testClocks.advance({
+    test_clock: testClockId,
+    frozen_time: Math.floor(Date.now() / 1000) + 24 * 60 * 60
+  })
+  let response = new HTTPResponse('Test clock fast-forwarded by 24 hours', {
+    newFrozenTime: updatedTestClock.frozen_time
+  })
 
+  ctx.status = statusCodes.OK
+  ctx.body = response
+}
 
 module.exports = {
   stripeSubscription,
@@ -183,5 +235,8 @@ module.exports = {
   deleteSubscription,
   stripeWebHook,
   updateSubscriptionCard,
-  upcomingBills
+  upcomingBills,
+  getSubscriptionDetails,
+  createTestClockAndSubscription,
+  fastForwardTestClock
 }

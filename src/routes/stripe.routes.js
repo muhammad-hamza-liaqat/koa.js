@@ -4,7 +4,10 @@ const {
   deleteSubscription,
   stripeWebHook,
   updateSubscriptionCard,
-  upcomingBills
+  upcomingBills,
+  getSubscriptionDetails,
+  createTestClockAndSubscription,
+  fastForwardTestClock
 } = require('../controllers/stripe.controller')
 const { catchAsyncErrors } = require('../helpers/tryCatch.helper')
 const Router = require('koa-router')
@@ -44,5 +47,11 @@ stripeRoutes.post(
   catchAsyncErrors(stripeWebHook)
 )
 stripeRoutes.get('/upcoming/:id', catchAsyncErrors(upcomingBills))
+
+stripeRoutes.get('/getDetails', catchAsyncErrors(getSubscriptionDetails))
+
+stripeRoutes.post('/subscription-test', catchAsyncErrors(createTestClockAndSubscription))
+
+stripeRoutes.post('/testClock-fast', catchAsyncErrors(fastForwardTestClock))
 
 module.exports = { stripeRoutes }
