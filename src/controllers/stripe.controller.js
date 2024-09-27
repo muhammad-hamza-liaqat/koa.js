@@ -149,8 +149,9 @@ const stripeWebHook = async ctx => {
       break
 
     case "customer.subscription.trial_will_end":
-      const session = event.data.object;
-      const metaData = session.metadata;
+      const subscription = event.data.object;
+      const metaData = subscription.metadata;
+      console.log("metadata from subscription --------> trails ends ------------>", metaData);
       console.log("TRIAL PERIOD ENDED----------------------------------->")
       console.log(`trail period ended and will be charged price: $${metaData.price_id}`)
       break
@@ -247,10 +248,10 @@ const subscriptionWithTrial = async ctx => {
       mode: 'subscription',
       subscription_data: {
         trial_period_days: 2, 
-      },
-      metadata:{
-        userName: "custom testing- passing static data",
-        price_id: priceId
+        metadata:{
+          userName: "free trail testing user",
+          price_id: priceId
+        }
       },
       success_url: process.env.SUCCESS_URL,
       cancel_url: process.env.CANCEL_URL,
