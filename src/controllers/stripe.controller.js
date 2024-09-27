@@ -224,15 +224,6 @@ const getSubscriptionDetails = async ctx => {
   ctx.body = response
 }
 
-// const advanceBillingTesting = async ctx => {
-//   const { subscriptionId } = ctx.request.body
-//   const updateSubscription = await stripe.subscriptions.update(subscriptionId, {
-//     billing_cycle_anchor: 'now',
-//     proration_behavior: 'create_prorations'
-//   })
-//   console.log('subscription time updated', updateSubscription)
-// }
-
 const subscriptionWithTrial = async ctx => {
   let response;
   const { priceId } = ctx.request.body;
