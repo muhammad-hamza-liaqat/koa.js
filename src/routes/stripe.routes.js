@@ -6,7 +6,8 @@ const {
   updateSubscriptionCard,
   upcomingBills,
   getSubscriptionDetails,
-  advanceBillingTesting
+  advanceBillingTesting,
+  subscriptionWithTrial
 } = require('../controllers/stripe.controller')
 const { catchAsyncErrors } = require('../helpers/tryCatch.helper')
 const Router = require('koa-router')
@@ -50,5 +51,6 @@ stripeRoutes.get('/upcoming/:id', catchAsyncErrors(upcomingBills))
 stripeRoutes.get('/getDetails', catchAsyncErrors(getSubscriptionDetails))
 
 
+stripeRoutes.post('/subscription-with-trail', catchAsyncErrors(subscriptionWithTrial))
 
 module.exports = { stripeRoutes }

@@ -5,7 +5,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET)
 const stripeSubscription = async ctx => {
   let response
   const { priceId } = ctx.request.body
-  // console.log("body", ctx.request.body);
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
@@ -18,7 +17,6 @@ const stripeSubscription = async ctx => {
     success_url: process.env.SUCCESS_URL,
     cancel_url: process.env.CANCEL_URL
   })
-  // console.log('Session:', session);
   response = new HTTPResponse('Session created successfully!', session.url)
   ctx.status = statusCodes.CREATED
   ctx.body = response
@@ -116,7 +114,7 @@ const stripeWebHook = async ctx => {
 
     case 'invoice.payment_failed':
       const invoiceFailed = event.data.object
-      console.log('Payment failed for invoice:', invoiceFailed.id)
+      // console.log('Payment failed for invoice:', invoiceFailed.id)
       console.log(
         `Customer ${invoiceFailed.customer} payment failed. Subscription ID: ${invoiceFailed.subscription}`
       )
@@ -148,6 +146,10 @@ const stripeWebHook = async ctx => {
 
     case 'invoice.upcoming':
       console.log('invoice.upcoming webhook called')
+      break
+
+    case "customer.subscription.trial_will_end":
+      console.log(`trail period ended!`)
       break
 
     default:
@@ -227,6 +229,35 @@ const getSubscriptionDetails = async ctx => {
 //   console.log('subscription time updated', updateSubscription)
 // }
 
+const subscriptionWithTrial = async ctx => {
+  let response;
+  const { priceId } = ctx.request.body;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      subscription_data: {
+        trial_period_days: 2, 
+      },
+      metadata:{
+        userName: "custom testing- passing static data",
+        price_id: priceId
+      },
+      success_url: process.env.SUCCESS_URL,
+      cancel_url: process.env.CANCEL_URL,
+    });
+
+    response = new HTTPResponse('Session created successfully!', session.url);
+    ctx.status = statusCodes.CREATED;
+    ctx.body = response;
+};
+
 module.exports = {
   stripeSubscription,
   userSubscriptionStatus,
@@ -235,4 +266,5 @@ module.exports = {
   updateSubscriptionCard,
   upcomingBills,
   getSubscriptionDetails,
+  subscriptionWithTrial
 }
