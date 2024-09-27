@@ -50,8 +50,6 @@ stripeRoutes.get('/upcoming/:id', catchAsyncErrors(upcomingBills))
 
 stripeRoutes.get('/getDetails', catchAsyncErrors(getSubscriptionDetails))
 
-stripeRoutes.post('/subscription-test', catchAsyncErrors(createTestClockAndSubscription))
 
-stripeRoutes.post('/testClock-fast', catchAsyncErrors(fastForwardTestClock))
 
 module.exports = { stripeRoutes }

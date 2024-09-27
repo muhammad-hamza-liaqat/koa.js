@@ -214,20 +214,7 @@ const getSubscriptionDetails = async ctx => {
   ctx.body = response
 }
 
-const fastForwardTestClock = async ctx => {
-  const { testClockId } = ctx.request.body
 
-  const updatedTestClock = await stripe.test_helpers.testClocks.advance({
-    test_clock: testClockId,
-    frozen_time: Math.floor(Date.now() / 1000) + 24 * 60 * 60
-  })
-  let response = new HTTPResponse('Test clock fast-forwarded by 24 hours', {
-    newFrozenTime: updatedTestClock.frozen_time
-  })
-
-  ctx.status = statusCodes.OK
-  ctx.body = response
-}
 
 module.exports = {
   stripeSubscription,
@@ -237,6 +224,4 @@ module.exports = {
   updateSubscriptionCard,
   upcomingBills,
   getSubscriptionDetails,
-  createTestClockAndSubscription,
-  fastForwardTestClock
 }
