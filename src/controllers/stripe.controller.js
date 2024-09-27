@@ -149,7 +149,10 @@ const stripeWebHook = async ctx => {
       break
 
     case "customer.subscription.trial_will_end":
-      console.log(`trail period ended!`)
+      const session = event.data.object;
+      const metaData = session.metadata;
+      console.log("TRIAL PERIOD ENDED----------------------------------->")
+      console.log(`trail period ended and will be charged price: $${metaData.price_id}`)
       break
 
     default:
