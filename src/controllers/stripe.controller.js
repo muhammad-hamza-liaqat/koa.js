@@ -228,29 +228,29 @@ const subscriptionWithTrial = async ctx => {
   let response;
   const { priceId } = ctx.request.body;
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      subscription_data: {
-        trial_period_days: 2, 
-        metadata:{
-          userName: "free trail testing user",
-          price_id: priceId
-        }
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
       },
-      success_url: process.env.SUCCESS_URL,
-      cancel_url: process.env.CANCEL_URL,
-    });
+    ],
+    mode: 'subscription',
+    subscription_data: {
+      trial_period_days: 2,
+      metadata: {
+        userName: "free trail testing user",
+        price_id: priceId
+      }
+    },
+    success_url: process.env.SUCCESS_URL,
+    cancel_url: process.env.CANCEL_URL,
+  });
 
-    response = new HTTPResponse('Session created successfully!', session.url);
-    ctx.status = statusCodes.CREATED;
-    ctx.body = response;
+  response = new HTTPResponse('Session created successfully!', session.url);
+  ctx.status = statusCodes.CREATED;
+  ctx.body = response;
 };
 
 module.exports = {
